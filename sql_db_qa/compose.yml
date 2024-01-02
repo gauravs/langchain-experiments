@@ -8,13 +8,16 @@ services:
       dockerfile: Dockerfile
     working_dir: /app
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - .:/app
       - torch_cache:/root/.cache/torch
+    # useful to shell into the container
+    command: bash -c "echo Running... && sleep inf"
+    # to connect to ollama running on host at
+    # available at http://host.docker.internal:11434
     extra_hosts:
       host.docker.internal: host-gateway
-    command: sleep inf
 
 volumes:
   torch_cache:

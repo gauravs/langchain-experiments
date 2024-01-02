@@ -12,8 +12,7 @@ services:
       - http
     image: semitechnologies/weaviate:1.22.7
     ports:
-      - 8080:8080
-      - 50051:50051
+      - 18080:8080
     volumes:
       - weaviate_data:/var/lib/weaviate
     restart: on-failure:0
@@ -26,19 +25,27 @@ services:
       CLUSTER_HOSTNAME: 'node1'
   app:
     init: true
+    container_name: chat-app
     build:
       context: .
       dockerfile: Dockerfile
     working_dir: /app
+    ports:
+      - 8080:8080
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEAVIATE_URL=http://weaviate:8080
+      - RECORD_MANAGER_DB_URL=sqlite:///db/test.db
     volumes:
       - .:/app
     depends_on:
       - weaviate
-    command: >
-      bash -c "echo Running ... &&
-               sleep inf"
+    # to connect to ollama running on host at
+    # available at http://host.docker.internal:11434
+    extra_hosts:
+      host.docker.internal: host-gateway
+    # command: bash -c "echo Running... && sleep inf"
+    command: bash -c "poetry run make start"
 
 volumes:
   weaviate_data:
